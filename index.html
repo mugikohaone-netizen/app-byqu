@@ -386,7 +386,7 @@ canvas{width:100%!important;border-radius:8px}
     </div>
   </div>
 
-  <button class="btn-org" onclick="saveToday()">💾 今日の記録を保存</button>
+  <button class="btn-org" onclick="saveToday()">💾 手動で記録を保存</button>
 
   <div id="today-prompt-wrap">
     <div class="card" style="border:1.5px solid var(--org-b)">
@@ -465,7 +465,7 @@ canvas{width:100%!important;border-radius:8px}
 </div>
 
 <!-- ===== 設定<!-- ===== 設定 ===== -->
-<div class="page" id="page4">
+<div class="page" id="page3">
 
   <div class="card">
     <div class="ctitle">📊 基本情報</div>
@@ -1081,7 +1081,33 @@ async function copyPrompt() {
     const ta = document.createElement('textarea');
     ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
   }
-  toast('✅ コピーしました！');
+  // コピーと同時に記録を保存
+  autoSaveOnCopy();
+  toast('✅ コピー＆記録しました！');
+}
+
+function autoSaveOnCopy() {
+  const today = todayStr();
+  const w      = parseFloat(document.getElementById('t-weight').value) || null;
+  const f      = parseFloat(document.getElementById('t-fat').value)    || null;
+  const work   = +document.getElementById('t-work').value;
+  const exFree = document.getElementById('t-exfree').value.trim();
+  const special= document.getElementById('t-special').value.trim();
+  const exArr  = Object.keys(exerciseSel).filter(k=>exerciseSel[k]);
+  const kcal   = currentKcal();
+
+  const rec = {date:today, weight:w, fat:f, work, exArr, exFree, special, kcal};
+  const idx = records.findIndex(r => r.date === today);
+  if (idx >= 0) records[idx] = rec; else records.push(rec);
+  records.sort((a,b) => a.date.localeCompare(b.date));
+  localStorage.setItem('ysb2_records', JSON.stringify(records));
+
+  if (w || f) showTodayStat(rec);
+  renderHist();
+  renderProgress();
+  updateBadges();
+  drawChart('weight', wMode);
+  drawChart('fat', fMode);
 }
 
 
@@ -1188,7 +1214,6 @@ function renderHist() {
         <div class="hist-vals">${r.weight?'⚖️'+r.weight+'kg ':''
           }${r.fat?'💧'+r.fat+'% ':''
           }${r.kcal?'🔥'+r.kcal+'kcal ':''
-          }${food?'🍽️'+food+' ':''
           }${ex?'💪'+ex:''}</div>
       </div>
       <button class="hist-del" onclick="delRec('${r.date}')">✕</button>
@@ -1281,9 +1306,14 @@ function execReset() {
 
 // ===== タブ =====
 function goTab(i) {
-  document.querySelectorAll('.page').forEach((p,j)=>p.className='page'+(j===i?' active':''));
-  document.querySelectorAll('.tab').forEach((t,j)=>t.className='tab'+(j===i?' active':''));
+  // ページ切り替え（page0〜page3のIDで管理）
+  [0,1,2,3].forEach(n => {
+    const p = document.getElementById('page'+n);
+    if (p) p.className = 'page' + (n===i ? ' active' : '');
+  });
+  document.querySelectorAll('.tab').forEach((t,j) => t.className='tab'+(j===i?' active':''));
   if (i===2) { setTimeout(()=>{ drawChart('weight',wMode); drawChart('fat',fMode); }, 50); }
+  if (i===1) { renderHist(); renderProgress(); }
 }
 
 // ===== ユーティリティ =====
