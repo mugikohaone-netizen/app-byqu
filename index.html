@@ -241,8 +241,7 @@ canvas{width:100%!important;border-radius:8px}
   <div class="tab active" onclick="goTab(0)"><span class="tab-icon">🏠</span>今日</div>
   <div class="tab" onclick="goTab(1)"><span class="tab-icon">📊</span>記録</div>
   <div class="tab" onclick="goTab(2)"><span class="tab-icon">📈</span>グラフ</div>
-  <div class="tab" onclick="goTab(3)"><span class="tab-icon">🤖</span>AI送信</div>
-  <div class="tab" onclick="goTab(4)"><span class="tab-icon">⚙️</span>設定</div>
+  <div class="tab" onclick="goTab(3)"><span class="tab-icon">⚙️</span>設定</div>
 </div>
 
 <!-- ===== 今日 ===== -->
@@ -380,6 +379,23 @@ canvas{width:100%!important;border-radius:8px}
   </div>
 
   <button class="btn-org" onclick="saveToday()">💾 今日の記録を保存</button>
+
+  <div id="today-prompt-wrap" style="display:none">
+    <div class="card" style="border:1.5px solid var(--org-b)">
+      <div class="ctitle">🤖 AIトレーナーへの日次報告</div>
+      <div class="prompt-box" id="prompt-out">生成中...</div>
+      <div class="btn-grp">
+        <button class="btn-org" onclick="copyPrompt()" style="font-size:16px;padding:15px">📋 コピーしてAIに送信する</button>
+        <button class="btn-ghost" onclick="genPrompt()">🔄 再生成</button>
+      </div>
+      <div class="prompt-note" style="margin-top:10px">
+        ✅ コピー後、Claude・ChatGPT・Geminiに貼り付けるだけ。<br>
+        🇺🇸 英語（高精度）生成 → 日本語で返答されます。<br>
+        📸 体組成スクショは貼り付け後にAIへ添付してください。
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== 記録 ===== -->
@@ -440,32 +456,7 @@ canvas{width:100%!important;border-radius:8px}
   </div>
 </div>
 
-<!-- ===== AI送信 ===== -->
-<div class="page" id="page3">
-  <div class="card">
-    <div class="ctitle">🤖 AIトレーナーへの日次報告</div>
-
-    <button class="btn-org" onclick="copyPrompt()" style="font-size:16px;padding:16px">📋 コピーしてAIに送信する</button>
-
-    <div style="margin-top:12px">
-      <div class="prompt-toggle" onclick="togglePromptView()">
-        <span id="prompt-toggle-label">▶ プロンプトの内容を確認する</span>
-      </div>
-      <div id="prompt-area" style="display:none;margin-top:8px">
-        <div class="prompt-box" id="prompt-out">生成中...</div>
-        <button class="btn-ghost" style="margin-top:8px" onclick="genPrompt()">🔄 再生成</button>
-      </div>
-    </div>
-
-    <div class="prompt-note" style="margin-top:12px">
-      ✅ コピー後、Claude・ChatGPT・Geminiに貼り付けるだけ。<br>
-      🇺🇸 プロンプトは英語（高精度）生成 → 日本語で返答されます。<br>
-      📸 食事の詳細は貼り付け後にAIへ直接伝えてください。
-    </div>
-  </div>
-</div>
-
-<!-- ===== 設定 ===== -->
+<!-- ===== 設定<!-- ===== 設定 ===== -->
 <div class="page" id="page4">
 
   <div class="card">
@@ -770,6 +761,9 @@ function restoreToday() {
 
   if (rec.weight || rec.fat) showTodayStat(rec);
   if (rec.weight) onWeightInput();
+  // 今日の記録が既にある場合はプロンプトエリアも表示
+  document.getElementById('today-prompt-wrap').style.display = 'block';
+  genPrompt();
 }
 
 function saveToday() {
@@ -795,6 +789,10 @@ function saveToday() {
   drawChart('weight', wMode);
   drawChart('fat', fMode);
   genPrompt();
+  // 保存後にプロンプトエリアを表示してスクロール
+  const wrap = document.getElementById('today-prompt-wrap');
+  wrap.style.display = 'block';
+  setTimeout(() => wrap.scrollIntoView({behavior:'smooth', block:'start'}), 150);
   toast('💾 今日の記録を保存しました！');
 }
 
@@ -1055,15 +1053,6 @@ function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,los
   document.getElementById('prompt-out').textContent = lines.join('\n');
 }
 
-function togglePromptView() {
-  const area = document.getElementById('prompt-area');
-  const label = document.getElementById('prompt-toggle-label');
-  const isHidden = area.style.display === 'none';
-  area.style.display = isHidden ? 'block' : 'none';
-  label.textContent = isHidden ? '▼ プロンプトを閉じる' : '▶ プロンプトの内容を確認する';
-  if (isHidden) genPrompt();
-}
-
 async function copyPrompt() {
   const text = document.getElementById('prompt-out').textContent;
   try { await navigator.clipboard.writeText(text); } catch {
@@ -1267,7 +1256,6 @@ function goTab(i) {
   document.querySelectorAll('.page').forEach((p,j)=>p.className='page'+(j===i?' active':''));
   document.querySelectorAll('.tab').forEach((t,j)=>t.className='tab'+(j===i?' active':''));
   if (i===2) { setTimeout(()=>{ drawChart('weight',wMode); drawChart('fat',fMode); }, 50); }
-  if (i===3) genPrompt();
 }
 
 // ===== ユーティリティ =====
