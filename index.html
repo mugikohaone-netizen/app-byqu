@@ -125,6 +125,11 @@ canvas{width:100%!important;border-radius:8px}
 
 /* ===== NOTE ===== */
 .note{background:var(--org-p);border-left:3px solid var(--org);border-radius:0 8px 8px 0;padding:8px 10px;font-size:11px;color:var(--sub);line-height:1.55;margin-top:8px}
+.sc-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.sc-step{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--txt);line-height:1.5}
+.sc-num{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
+.sc-apps{display:flex;flex-wrap:wrap;gap:6px}
+.sc-app{background:var(--blue-p);border:1px solid #bbdefb;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue)}
 
 /* ===== PROGRESS ===== */
 .prog-wrap{background:#eee;border-radius:99px;height:8px;overflow:hidden;margin-top:5px}
@@ -350,6 +355,28 @@ canvas{width:100%!important;border-radius:8px}
     <div class="ctitle">📝 今日のメモ（任意）</div>
     <textarea id="t-special" placeholder="例：飲み会あり、16時間断食など&#10;食事の詳細はAIチャットで直接伝えてください（写真でもOK）"></textarea>
     <div class="note" style="margin-top:8px">💡 食事の詳細はコピー後にAIへ直接報告。写真や文章でOKです。</div>
+  </div>
+
+  <div class="card" style="border:1.5px solid #e3f2fd">
+    <div class="ctitle" style="color:var(--blue)">📸 体組成データのスクショ連携</div>
+    <div style="font-size:13px;line-height:1.8;color:var(--txt);margin-bottom:10px">
+      体重計アプリのスクショをAIに一緒に送ると、より詳しいアドバイスがもらえます。
+    </div>
+    <div class="sc-steps">
+      <div class="sc-step"><span class="sc-num">1</span><span>体重計に乗ってアプリでデータを確認</span></div>
+      <div class="sc-step"><span class="sc-num">2</span><span>スクショを撮る（ホームボタン＋電源など）</span></div>
+      <div class="sc-step"><span class="sc-num">3</span><span>AI送信タブでプロンプトをコピー</span></div>
+      <div class="sc-step"><span class="sc-num">4</span><span>AIのチャットに貼り付け＋スクショも添付して送信</span></div>
+    </div>
+    <div class="sc-apps">
+      <span class="sc-app">🇯🇵 タニタ</span>
+      <span class="sc-app">🫀 オムロン</span>
+      <span class="sc-app">🍎 Apple Health</span>
+      <span class="sc-app">⌚ Garmin</span>
+      <span class="sc-app">🌍 Withings</span>
+      <span class="sc-app">💪 その他OK</span>
+    </div>
+    <div class="note" style="margin-top:10px">💡 スクショなしでも今まで通り使えます。あればより詳しいアドバイスに！</div>
   </div>
 
   <button class="btn-org" onclick="saveToday()">💾 今日の記録を保存</button>
@@ -1021,6 +1048,8 @@ function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,los
   lines.push('');
   lines.push('IMPORTANT: Never shame or criticize calorie overages. Always be supportive and forward-looking. Acknowledge trends in my weight data to give truly personalized advice. Keep it concise and actionable.');
 
+  lines.push('');
+  lines.push('📸 If the user attaches a screenshot of their health/body composition data (from apps like Tanita, Omron, Withings, Garmin, Apple Health, etc.), please read all visible metrics from the image and incorporate them into your personalized advice. If no screenshot is attached, use the data provided above.');
   lines.push('');
   lines.push('Please respond in Japanese.');
   document.getElementById('prompt-out').textContent = lines.join('\n');
