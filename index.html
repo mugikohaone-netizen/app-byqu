@@ -479,10 +479,11 @@ canvas{width:100%!important;border-radius:8px}
       <div class="fg"><label>体重（kg）</label><input type="number" id="s-weight" min="30" max="300" step="0.1" placeholder="75.0" oninput="calcKcal();saveSettings()"></div>
       <div class="fg"><label>月の減量目標</label>
         <select id="s-goal" onchange="calcKcal();saveSettings()">
-          <option value="0.5">0.5 kg</option>
-          <option value="1" selected>1 kg</option>
-          <option value="1.5">1.5 kg</option>
-          <option value="2">2 kg</option>
+          <option value="0">⚖️ 現状維持</option>
+          <option value="0.5">0.5 kg減</option>
+          <option value="1" selected>1 kg減</option>
+          <option value="1.5">1.5 kg減</option>
+          <option value="2">2 kg減</option>
         </select>
       </div>
     </div>
@@ -879,14 +880,15 @@ function calcKcal() {
   const exBonus = calcExBonus();
 
   const tdee   = baseTdee + exBonus;
-  const deficit= Math.round((goal * 7200) / 30);
+  const deficit= goal > 0 ? Math.round((goal * 7200) / 30) : 0;
   const target = Math.max(1200, tdee - deficit);
 
-  const bonusTxt = exBonus > 0 ? ` + 運動補正 ${exBonus}` : '';
+  const bonusTxt  = exBonus > 0 ? ` + 運動補正 ${exBonus}` : '';
+  const deficitTxt = deficit > 0 ? ` − ${deficit}（赤字）` : '';
   document.getElementById('calc-det').textContent =
-    `基礎代謝 ${bmr} × ${workFactor}（仕事）= ${baseTdee}${bonusTxt} = ${tdee} − ${deficit}（赤字） = ${target} kcal`;
+    `基礎代謝 ${bmr} × ${workFactor}（仕事）= ${baseTdee}${bonusTxt} = ${tdee}${deficitTxt} = ${target} kcal`;
   document.getElementById('kcal-disp').textContent = target.toLocaleString();
-  document.getElementById('kcal-sub').textContent  = `BMR: ${bmr} kcal ／ 月${goal}kg減目標`;
+  document.getElementById('kcal-sub').textContent  = goal > 0 ? `BMR: ${bmr} kcal ／ 月${goal}kg減目標` : `BMR: ${bmr} kcal ／ 現状維持モード`;
 
   // 目標カロリーのヒント
   const hint = document.getElementById('kcal-hint');
