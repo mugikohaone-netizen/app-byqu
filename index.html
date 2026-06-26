@@ -733,7 +733,8 @@ function saveSettings() {
   settings.weight = +document.getElementById('s-weight').value || null;
   settings.goal   = document.getElementById('s-goal').value !== '' ? +document.getElementById('s-goal').value : 1;
   settings.target = +document.getElementById('s-target').value || null;
-  settings.start  = document.getElementById('s-start').value   || settings.start;
+  const rawStart = document.getElementById('s-start').value || '';
+  settings.start  = rawStart ? rawStart.replace(/\//g, '-') : settings.start;
   settings.motiv  = document.getElementById('s-motiv').value   || '';
   saveSettingsToStorage();
   updateBMI();
@@ -1112,7 +1113,13 @@ function updateBadges() {
 function getDayCount() {
   const start = settings.start;
   if (!start) return null;
-  return Math.floor((new Date() - new Date(start)) / 86400000) + 1;
+  // スラッシュ区切りをハイフンに統一してパース
+  const startDate = new Date(start.replace(/\//g, '-'));
+  if (isNaN(startDate)) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  startDate.setHours(0,0,0,0);
+  return Math.floor((today - startDate) / 86400000) + 1;
 }
 
 function getStreak() {
