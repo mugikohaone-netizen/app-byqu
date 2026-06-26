@@ -681,7 +681,9 @@ function launchApp() {
   restoreToday();
   drawChart('weight', wMode);
   drawChart('fat', fMode);
+  // 常にプロンプトを生成・表示（記録の有無に関係なく）
   genPrompt();
+  document.getElementById('today-prompt-wrap').style.display = 'block';
 }
 
 // ===== オンボーディング =====
@@ -728,7 +730,7 @@ function saveSettings() {
   settings.age    = +document.getElementById('s-age').value    || null;
   settings.height = +document.getElementById('s-height').value || null;
   settings.weight = +document.getElementById('s-weight').value || null;
-  settings.goal   = +document.getElementById('s-goal').value   || 1;
+  settings.goal   = document.getElementById('s-goal').value !== '' ? +document.getElementById('s-goal').value : 1;
   settings.target = +document.getElementById('s-target').value || null;
   settings.start  = document.getElementById('s-start').value   || settings.start;
   settings.motiv  = document.getElementById('s-motiv').value   || '';
@@ -860,7 +862,7 @@ function calcKcal() {
   const age = +document.getElementById('s-age').value || settings.age || 0;
   const h   = +document.getElementById('s-height').value || settings.height || 0;
   const w   = +document.getElementById('s-weight').value || settings.weight || 0;
-  const goal= +document.getElementById('s-goal').value || settings.goal || 1;
+  const goal = document.getElementById('s-goal').value !== '' ? +document.getElementById('s-goal').value : (settings.goal ?? 1);
   // 仕事係数（活動乗数として直接使う）
   const workFactor = parseFloat(document.getElementById('t-work').value) || 1.2;
 
@@ -1031,7 +1033,7 @@ function genPrompt() {
 
 function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,lost,days,streak,motiv,special}) {
   let lines = ["[Today's Status Update]"];
-  if (kcal) lines.push(`- Target calorie intake today: ${kcal} kcal`);
+  if (kcal != null) lines.push(`- Target calorie intake today: ${kcal} kcal`);
   lines.push(`- Work intensity: ${workLabel}`);
   if (allEx.length) lines.push(`- Today's exercise goals: ${allEx.join(', ')}`);
   if (todayW) lines.push(`- Today's weight: ${todayW} kg`);
