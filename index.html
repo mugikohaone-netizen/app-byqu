@@ -130,6 +130,9 @@ canvas{width:100%!important;border-radius:8px}
 .sc-num{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
 .sc-apps{display:flex;flex-wrap:wrap;gap:6px}
 .sc-app{background:var(--blue-p);border:1px solid #bbdefb;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue)}
+.sc-accordion{display:flex;justify-content:space-between;align-items:center;background:var(--blue-p);border:1.5px solid #bbdefb;border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;user-select:none;transition:.15s}
+.sc-accordion:active{opacity:.75}
+#sc-detail .card{border-radius:0 0 var(--r) var(--r)}
 
 /* ===== PROGRESS ===== */
 .prog-wrap{background:#eee;border-radius:99px;height:8px;overflow:hidden;margin-top:5px}
@@ -356,26 +359,30 @@ canvas{width:100%!important;border-radius:8px}
     <div class="note" style="margin-top:8px">💡 食事の詳細はコピー後にAIへ直接報告。写真や文章でOKです。</div>
   </div>
 
-  <div class="card" style="border:1.5px solid #e3f2fd">
-    <div class="ctitle" style="color:var(--blue)">📸 体組成データのスクショ連携</div>
-    <div style="font-size:13px;line-height:1.8;color:var(--txt);margin-bottom:10px">
-      体重計アプリのスクショをAIに一緒に送ると、より詳しいアドバイスがもらえます。
+  <div class="sc-accordion" onclick="toggleSc()">
+    <span>📸 体組成計アプリをお使いの方へ</span>
+    <span id="sc-arrow">▶</span>
+  </div>
+  <div id="sc-detail" style="display:none">
+    <div class="card" style="border:1.5px solid #e3f2fd;margin-top:0;border-top-left-radius:0;border-top-right-radius:0">
+      <div style="font-size:13px;line-height:1.8;color:var(--txt);margin-bottom:10px">
+        体重計アプリのスクショをAIに一緒に送ると、筋肉量・基礎代謝・体水分率なども読み取ってより詳しいアドバイスがもらえます。
+      </div>
+      <div class="sc-steps">
+        <div class="sc-step"><span class="sc-num">1</span><span>体重計に乗ってアプリでデータを確認</span></div>
+        <div class="sc-step"><span class="sc-num">2</span><span>スクショを撮る（ホームボタン＋電源など）</span></div>
+        <div class="sc-step"><span class="sc-num">3</span><span>下のコピーボタンでプロンプトをコピー</span></div>
+        <div class="sc-step"><span class="sc-num">4</span><span>AIのチャットに貼り付け＋スクショも添付して送信</span></div>
+      </div>
+      <div class="sc-apps">
+        <span class="sc-app">🇯🇵 タニタ</span>
+        <span class="sc-app">🫀 オムロン</span>
+        <span class="sc-app">🍎 Apple Health</span>
+        <span class="sc-app">⌚ Garmin</span>
+        <span class="sc-app">🌍 Withings</span>
+        <span class="sc-app">💪 その他OK</span>
+      </div>
     </div>
-    <div class="sc-steps">
-      <div class="sc-step"><span class="sc-num">1</span><span>体重計に乗ってアプリでデータを確認</span></div>
-      <div class="sc-step"><span class="sc-num">2</span><span>スクショを撮る（ホームボタン＋電源など）</span></div>
-      <div class="sc-step"><span class="sc-num">3</span><span>AI送信タブでプロンプトをコピー</span></div>
-      <div class="sc-step"><span class="sc-num">4</span><span>AIのチャットに貼り付け＋スクショも添付して送信</span></div>
-    </div>
-    <div class="sc-apps">
-      <span class="sc-app">🇯🇵 タニタ</span>
-      <span class="sc-app">🫀 オムロン</span>
-      <span class="sc-app">🍎 Apple Health</span>
-      <span class="sc-app">⌚ Garmin</span>
-      <span class="sc-app">🌍 Withings</span>
-      <span class="sc-app">💪 その他OK</span>
-    </div>
-    <div class="note" style="margin-top:10px">💡 スクショなしでも今まで通り使えます。あればより詳しいアドバイスに！</div>
   </div>
 
   <button class="btn-org" onclick="saveToday()">💾 今日の記録を保存</button>
@@ -1051,6 +1058,14 @@ function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,los
   lines.push('');
   lines.push('Please respond in Japanese.');
   document.getElementById('prompt-out').textContent = lines.join('\n');
+}
+
+function toggleSc() {
+  const detail = document.getElementById('sc-detail');
+  const arrow  = document.getElementById('sc-arrow');
+  const isHidden = detail.style.display === 'none';
+  detail.style.display = isHidden ? 'block' : 'none';
+  arrow.textContent = isHidden ? '▼' : '▶';
 }
 
 async function copyPrompt() {
