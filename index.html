@@ -387,7 +387,7 @@ canvas{width:100%!important;border-radius:8px}
 
   <button class="btn-org" onclick="saveToday()">💾 今日の記録を保存</button>
 
-  <div id="today-prompt-wrap" style="display:none">
+  <div id="today-prompt-wrap">
     <div class="card" style="border:1.5px solid var(--org-b)">
       <div class="ctitle">🤖 AIトレーナーへの日次報告</div>
       <div class="prompt-box" id="prompt-out">生成中...</div>
@@ -705,7 +705,7 @@ function obComplete() {
     gender: obGenderVal,
     age, height: h, weight: w,
     target: +document.getElementById('ob-target').value || null,
-    goal: +document.getElementById('ob-goal').value || 1,
+    goal: document.getElementById('ob-goal').value !== '' ? +document.getElementById('ob-goal').value : 1,
     motiv: document.getElementById('ob-motiv').value.trim(),
     start: todayStr(),   // ← 初回設定日を自動セット
   };
@@ -862,7 +862,8 @@ function calcKcal() {
   const age = +document.getElementById('s-age').value || settings.age || 0;
   const h   = +document.getElementById('s-height').value || settings.height || 0;
   const w   = +document.getElementById('s-weight').value || settings.weight || 0;
-  const goal = document.getElementById('s-goal').value !== '' ? +document.getElementById('s-goal').value : (settings.goal ?? 1);
+  const goalEl = document.getElementById('s-goal');
+  const goal = goalEl && goalEl.value !== '' ? +goalEl.value : (settings.goal != null ? settings.goal : 1);
   // 仕事係数（活動乗数として直接使う）
   const workFactor = parseFloat(document.getElementById('t-work').value) || 1.2;
 
