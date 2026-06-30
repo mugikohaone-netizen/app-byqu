@@ -574,6 +574,21 @@ canvas{width:100%!important;border-radius:8px}
     </div>
   </div>
 
+  <div class="card">
+    <div class="ctitle">💾 データのバックアップ</div>
+    <div style="font-size:12px;color:var(--sub);line-height:1.7;margin-bottom:12px">
+      設定・記録データをファイルに書き出して保存できます。<br>機種変更やデータ消失の保険として定期的にエクスポートを推奨します。
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <button class="btn-org" onclick="exportData()">📤 データをエクスポート（書き出し）</button>
+      <label class="btn-ghost" style="cursor:pointer;justify-content:center">
+        📥 データをインポート（読み込み）
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      </label>
+    </div>
+    <div class="note" style="margin-top:10px">💡 エクスポートするとJSONファイルがダウンロードされます。インポートは既存データに上書きされます。</div>
+  </div>
+
   <div class="card" style="border:1px solid #ffdddd">
     <div class="ctitle" style="color:var(--red)">⚠️ 危険ゾーン</div>
     <div style="font-size:12px;color:var(--sub);margin-bottom:10px;line-height:1.6">全ての記録・設定データを削除します。<br>この操作は取り消せません。</div>
@@ -1209,6 +1224,51 @@ function setTrainer(el, mode) {
   el.classList.add('on');
   trainerMode = mode;
   genPrompt();
+}
+
+function exportData() {
+  const exportObj = {
+    version: APP_VERSION,
+    exportedAt: new Date().toISOString(),
+    settings: JSON.parse(localStorage.getItem('ysb2_settings') || '{}'),
+    records:  JSON.parse(localStorage.getItem('ysb2_records')  || '[]'),
+  };
+  const json = JSON.stringify(exportObj, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = `yaserobuta_backup_${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('📤 エクスポートしました！');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.settings && !data.records) {
+        toast('❌ 無効なファイルです');
+        return;
+      }
+      if (data.settings) localStorage.setItem('ysb2_settings', JSON.stringify(data.settings));
+      if (data.records)  localStorage.setItem('ysb2_records',  JSON.stringify(data.records));
+      toast('📥 インポート完了！再読み込みします…');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch(err) {
+      toast('❌ 読み込みエラー：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  // input をリセット（同じファイルを再度選べるように）
+  event.target.value = '';
 }
 
 function toggleSc() {
