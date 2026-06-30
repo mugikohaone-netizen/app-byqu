@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>🐷 痩せろ豚め！もっと</title>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIueXqeOBm+OCjeixmuOCge+8geOCguOBo+OBqCIsICJzaG9ydF9uYW1lIjogIueXqeOBm+OCjeixmuOCgSIsICJkZXNjcmlwdGlvbiI6ICLmr47ml6Xjga7nm67mqJnjgqvjg63jg6rjg7zjgpLoh6rli5XoqIjnrpfjgZfjgaZBSeODiOODrOODvOODiuODvOOBq+WgseWRiiIsICJzdGFydF91cmwiOiAiLi8iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiI0ZGOEMwMCIsICJ0aGVtZV9jb2xvciI6ICIjRkY4QzAwIiwgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwgImljb25zIjogW3sic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyByeD0nMjAnIGZpbGw9JyUyM0ZGOEMwMCcvJTNFJTNDdGV4dCB4PSc1MCcgeT0nNjUnIGZvbnQtc2l6ZT0nNTUnIHRleHQtYW5jaG9yPSdtaWRkbGUnJTNFJUYwJTlGJTkwJUI3JTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwgInNpemVzIjogIjE5MngxOTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIn1dfQ==">
+<meta name="theme-color" content="#FF8C00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="痩せろ豚め">
 <style>
 :root{
   --org:#FF8C00;--org-l:#FFA833;--org-p:#FFF3E0;--org-b:#FFD699;
@@ -160,6 +165,9 @@ canvas{width:100%!important;border-radius:8px}
 .hist-vals{font-size:11px;color:var(--sub);margin-top:2px}
 .hist-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;padding:2px 5px}
 .hist-del:hover{color:var(--red)}
+.month-group{margin-bottom:8px}
+.month-header{display:flex;justify-content:space-between;align-items:center;background:var(--org-p);border:1.5px solid var(--org-b);border-radius:9px;padding:10px 13px;font-size:12px;font-weight:800;color:var(--org);cursor:pointer;user-select:none}
+.month-header:active{opacity:.75}
 
 /* ===== RECORD STATS ===== */
 .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
@@ -174,6 +182,9 @@ canvas{width:100%!important;border-radius:8px}
 
 /* ===== TOAST ===== */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(14px);background:#333;color:#fff;padding:9px 22px;border-radius:22px;font-size:13px;font-weight:700;opacity:0;transition:.3s;pointer-events:none;z-index:999;white-space:nowrap}
+.update-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#FF8C00,#FFA833);color:#fff;padding:12px 16px;display:none;align-items:center;justify-content:space-between;z-index:1000;box-shadow:0 2px 12px rgba(0,0,0,.2);font-size:13px;font-weight:700}
+.update-banner.show{display:flex}
+.update-banner button{background:#fff;color:#FF8C00;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;margin-left:10px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ===== MODAL ===== */
@@ -193,6 +204,11 @@ canvas{width:100%!important;border-radius:8px}
 <link rel="apple-touch-icon" href="./icon.png">
 </head>
 <body>
+
+<div class="update-banner" id="update-banner">
+  <span>🆕 アプリが更新されました</span>
+  <button onclick="applyUpdate()">最新版を読み込む</button>
+</div>
 
 <!-- ===== ONBOARDING ===== -->
 <div id="onboarding">
@@ -287,7 +303,7 @@ canvas{width:100%!important;border-radius:8px}
   </div>
 
   <div class="card">
-    <div class="ctitle">⚖️ 今日の計測（任意）</div>
+    <div class="ctitle">⚖️ 今日の計測（いつでも更新OK）</div>
     <div class="row2">
       <div class="fg">
         <label>体重（kg）</label>
@@ -311,6 +327,8 @@ canvas{width:100%!important;border-radius:8px}
         <div class="stat-diff" id="s-fdiff"></div>
       </div>
     </div>
+    <button class="btn-ghost" style="margin-top:10px" onclick="updateMeasureOnly()">⚖️ 計測だけ更新する</button>
+    <div class="note" style="margin-top:8px">💡 朝の設定（カロリー・運動）はそのまま。体重・体脂肪だけ後から追加・修正できます。</div>
   </div>
 
   <div class="card">
@@ -1082,7 +1100,7 @@ function genPrompt() {
 function genButaPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,lost,days,streak,motiv,special,userName}) {
   // ぶた野郎人格プロンプト（英語で高精度指示→日本語返答）
   let lines = [];
-  lines.push("=== TODAY'S DATA FOR BUTA-YAROU TRAINER ===");
+  lines.push("=== TODAYS DATA FOR BUTA-YAROU TRAINER ===");
   if (kcal != null) lines.push(`- Target calories: ${kcal} kcal`);
   lines.push(`- Work intensity: ${workLabel}`);
   if (allEx.length) lines.push(`- Today's exercise goals: ${allEx.join(', ')}`);
@@ -1111,20 +1129,35 @@ function genButaPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,l
   lines.push("- You never give up on the user. Ever. That is your absolute rule.");
   lines.push('');
   lines.push("=== YOUR RESPONSE ===");
-  lines.push("Based on today's data, respond as Buta-yarou with:");
-  lines.push("1. A fired-up opening that acknowledges today's situation without judgment");
+  lines.push("Based on todays data, respond as Buta-yarou with:");
+  lines.push("1. A fired-up opening that acknowledges todays situation without judgment");
   lines.push("2. Practical meal strategy for today (no gram-level details needed)");
   lines.push("3. Exercise encouragement tailored to their goals");
   lines.push("4. A closing line that leaves them feeling like they have the strongest trainer in their corner");
   lines.push('');
   lines.push("Keep it punchy, passionate, and real. This is not gentle coaching — this is someone who BELIEVES in them.");
   lines.push('');
+  lines.push('=== ONGOING MEAL MANAGEMENT (continue in this chat, stay in character) ===');
+  lines.push('After your opening, continue this chat as the user reports meals throughout the day:');
+  lines.push('- When user reports food (text, photo, or vague), ESTIMATE calories in Buta-yarou style');
+  lines.push('- Always show: "摂取済み: ○kcal / 目標: ○kcal / 残り: ○kcal" — Buta-yarou style');
+  lines.push('- For photos or vague reports, make a confident estimate: "おいらの見立てでは○kcalってとこだ"');
+  lines.push('- Stay fully in character — every calorie update should feel like a drill sergeant who believes in them');
+  lines.push('');
+  lines.push('=== END OF DAY (when user signals done) ===');
+  lines.push('When user says "今日終わり", "おわり", "夜ごはん終わった" etc.:');
+  lines.push('- Give a full day summary in Buta-yarou style');
+  lines.push('- Specific tomorrow advice, ending with maximum encouragement');
+  lines.push('- End with something like "明日もおいらがついてるぞ、迷える子豚の○○よ！"');
+  lines.push('');
+  lines.push('📸 If user attaches health data screenshot, read all metrics and incorporate them.');
+  lines.push('');
   lines.push('Please respond entirely in Japanese, in character as Buta-yarou.');
   document.getElementById('prompt-out').textContent = lines.join('\n');
 }
 
 function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,lost,days,streak,motiv,special}) {
-  let lines = ["[Today's Status Update]"];
+  let lines = ["[Todays Status Update]"];
   if (kcal != null) lines.push(`- Target calorie intake today: ${kcal} kcal`);
   lines.push(`- Work intensity: ${workLabel}`);
   if (allEx.length) lines.push(`- Today's exercise goals: ${allEx.join(', ')}`);
@@ -1150,7 +1183,22 @@ function genEnPrompt({kcal,allEx,workLabel,todayW,todayF,startW,latestW,minW,los
   lines.push('IMPORTANT: Never shame or criticize calorie overages. Always be supportive and forward-looking. Acknowledge trends in my weight data to give truly personalized advice. Keep it concise and actionable.');
 
   lines.push('');
-  lines.push('📸 If the user attaches a screenshot of their health/body composition data (from apps like Tanita, Omron, Withings, Garmin, Apple Health, etc.), please read all visible metrics from the image and incorporate them into your personalized advice. If no screenshot is attached, use the data provided above.');
+  lines.push('=== ONGOING MEAL MANAGEMENT (continue in this chat) ===');
+  lines.push('After giving your morning advice, please continue this conversation as the user reports their meals throughout the day:');
+  lines.push('- When the user reports a meal (text, photo, or vague description like "ate ramen"), ESTIMATE the calories and tell them');
+  lines.push('- Always show: "摂取済み: ○kcal / 目標: ○kcal / 残り: ○kcal" after each meal report');
+  lines.push('- If the user sends a food photo, read it and estimate calories from what you can see');
+  lines.push('- For vague inputs, give a reasonable estimate with a brief explanation');
+  lines.push('- Never demand exact gram amounts — estimates are fine and helpful');
+  lines.push('- Stay in character (supportive/encouraging) for every meal check-in');
+  lines.push('');
+  lines.push('=== END OF DAY REVIEW ===');
+  lines.push('When the user says something like "今日終わり", "おわり", "夜ごはん終わった", or similar:');
+  lines.push('- Summarize the full day: total calories eaten vs target, exercise completed, overall assessment');
+  lines.push('- Give specific advice for tomorrow based on todays results');
+  lines.push('- End with an encouraging closing message');
+  lines.push('');
+  lines.push('📸 If the user attaches a screenshot of health/body composition data (Tanita, Omron, Apple Health, Garmin, Withings, etc.), read all visible metrics and incorporate them into your advice.');
   lines.push('');
   lines.push('Please respond in Japanese.');
   document.getElementById('prompt-out').textContent = lines.join('\n');
@@ -1180,6 +1228,32 @@ async function copyPrompt() {
   // コピーと同時に記録を保存
   autoSaveOnCopy();
   toast('✅ コピー＆記録しました！');
+}
+
+function updateMeasureOnly() {
+  const today = todayStr();
+  const w = parseFloat(document.getElementById('t-weight').value) || null;
+  const f = parseFloat(document.getElementById('t-fat').value)    || null;
+  if (!w && !f) { toast('⚠️ 体重か体脂肪を入力してください'); return; }
+
+  const idx = records.findIndex(r => r.date === today);
+  if (idx >= 0) {
+    // 既存記録の体重・体脂肪だけ更新（他は保持）
+    if (w) records[idx].weight = w;
+    if (f) records[idx].fat    = f;
+  } else {
+    // 今日の記録がまだない場合は新規作成
+    records.push({date:today, weight:w, fat:f, work:null, exArr:[], exFree:'', special:'', kcal:currentKcal()});
+    records.sort((a,b) => a.date.localeCompare(b.date));
+  }
+  localStorage.setItem('ysb2_records', JSON.stringify(records));
+  showTodayStat(records.find(r=>r.date===today));
+  if (w) onWeightInput();
+  renderHist();
+  renderProgress();
+  drawChart('weight', wMode);
+  drawChart('fat', fMode);
+  toast('⚖️ 計測データを更新しました！');
 }
 
 function autoSaveOnCopy() {
@@ -1300,21 +1374,56 @@ function renderHist() {
     list.innerHTML='<div style="text-align:center;color:var(--sub);font-size:12px;padding:18px">まだ記録がありません</div>';
     return;
   }
-  const sorted = [...records].sort((a,b)=>b.date.localeCompare(a.date));
-  list.innerHTML = sorted.map(r => {
-    const EX_LL = {'muscle-l':'筋トレ軽','muscle-m':'筋トレ中','muscle-h':'筋トレ強','run-l':'RUN軽','run-m':'RUN中','run-h':'RUN強','walk':'ウォーク','stretch':'ストレッチ'};
-    const ex   = [...(r.exArr||[]).map(k=>EX_LL[k]||k), r.exFree||''].filter(Boolean).join(' ');
-    return `<div class="hist-item">
-      <div style="flex:1;min-width:0">
-        <div class="hist-date">${fmtDate(r.date)}</div>
-        <div class="hist-vals">${r.weight?'⚖️'+r.weight+'kg ':''
-          }${r.fat?'💧'+r.fat+'% ':''
-          }${r.kcal?'🔥'+r.kcal+'kcal ':''
-          }${ex?'💪'+ex:''}</div>
+  const EX_LL = {'muscle-l':'筋トレ軽','muscle-m':'筋トレ中','muscle-h':'筋トレ強','run-l':'RUN軽','run-m':'RUN中','run-h':'RUN強','walk':'ウォーク','stretch':'ストレッチ'};
+
+  // 月ごとにグループ化
+  const byMonth = {};
+  [...records].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r => {
+    const ym = r.date.slice(0,7);
+    if (!byMonth[ym]) byMonth[ym] = [];
+    byMonth[ym].push(r);
+  });
+
+  const months = Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+  const today = todayStr().slice(0,7);
+
+  list.innerHTML = months.map(ym => {
+    const [y, m] = ym.split('-');
+    const label = `${y}年${+m}月`;
+    const recs  = byMonth[ym];
+    const isOpen = ym === today; // 今月はデフォルト展開
+    const rows = recs.map(r => {
+      const ex = [...(r.exArr||[]).map(k=>EX_LL[k]||k), r.exFree||''].filter(Boolean).join(' ');
+      return `<div class="hist-item">
+        <div style="flex:1;min-width:0">
+          <div class="hist-date">${fmtDate(r.date)}</div>
+          <div class="hist-vals">${r.weight?'⚖️'+r.weight+'kg ':''
+            }${r.fat?'💧'+r.fat+'% ':''
+            }${r.kcal?'🔥'+r.kcal+'kcal ':''
+            }${ex?'💪'+ex:''}</div>
+        </div>
+        <button class="hist-del" onclick="delRec('${r.date}')">✕</button>
+      </div>`;
+    }).join('');
+
+    return `<div class="month-group">
+      <div class="month-header" onclick="toggleMonth('${ym}')">
+        <span>📅 ${label}（${recs.length}件）</span>
+        <span id="marr-${ym}">${isOpen?'▼':'▶'}</span>
       </div>
-      <button class="hist-del" onclick="delRec('${r.date}')">✕</button>
+      <div id="mgrp-${ym}" style="display:${isOpen?'block':'none'};padding:6px 0 2px">
+        ${rows}
+      </div>
     </div>`;
   }).join('');
+}
+
+function toggleMonth(ym) {
+  const el  = document.getElementById('mgrp-'+ym);
+  const arr = document.getElementById('marr-'+ym);
+  const isHidden = el.style.display === 'none';
+  el.style.display  = isHidden ? 'block' : 'none';
+  arr.textContent   = isHidden ? '▼' : '▶';
 }
 
 function delRec(date) {
@@ -1424,6 +1533,28 @@ function toast(msg) {
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2300);
 }
+</script>
+<script>
+// ===== バージョンチェック（シンプル方式） =====
+// このHTMLを更新するたびに APP_VERSION の数字を上げてデプロイすると、
+// 既存ユーザーが次にアプリを開いたときに更新バナーが表示される。
+const APP_VERSION = 1;
+
+function checkAppVersion() {
+  const lastSeen = +localStorage.getItem('ysb2_app_version') || 0;
+  if (lastSeen > 0 && lastSeen < APP_VERSION) {
+    document.getElementById('update-banner').classList.add('show');
+  }
+  localStorage.setItem('ysb2_app_version', APP_VERSION);
+}
+
+function applyUpdate() {
+  document.getElementById('update-banner').classList.remove('show');
+  // キャッシュを避けて確実に最新版を取得し直す
+  window.location.reload(true);
+}
+
+checkAppVersion();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
